@@ -1,12 +1,29 @@
-FROM python:3.12-alpine
+FROM python:3.12-slim-bookworm
+
+RUN apt-get -y update && \
+    apt-get -y upgrade && \
+    apt-get install -y sqlite3 libsqlite3-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /ROOT
 
-COPY sql ./sql
+# install packages
 COPY Makefile pyproject.toml requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy database 
+COPY sql ./sql
+COPY bin ./bin
+
+# set executable permission and create db
+RUN chmod +x ./bin/backenddb
+RUN ./bin/backenddb create
+
+# copy module 
 COPY backend ./backend
 
-RUN pip install --no-cache-dir -r requirements.txt
+# install module 
 RUN pip install --no-cache-dir -e .
+
 
 ENTRYPOINT [ "flask", "--app", "backend", "run", "--host", "0.0.0.0", "--port", "5000"]

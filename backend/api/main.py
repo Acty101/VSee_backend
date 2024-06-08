@@ -1,11 +1,23 @@
 import flask
 import backend
+from backend.database import get_db
 
 
 @backend.app.route("/", methods=["GET"])
 def endpoints():
     """Return a list of all available endpoints."""
-    return flask.jsonify({"endpoints": []})
+    return flask.jsonify(
+        {
+            "endpoints": [
+                "/api/v1/account/create",
+                "/api/v1/questions/",
+                "/api/v1/answers/",
+                "/api/v1/startups/",
+                "/api/v1/request_startup_info/",
+                "/api/v1/request_summary/",
+            ]
+        }
+    )
 
 
 @backend.app.route("/api/v1/account/create", methods=["POST"])

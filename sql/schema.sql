@@ -32,6 +32,6 @@ CREATE TABLE bot_summary(
     vc_username VARCHAR(20) NOT NULL,
     text VARCHAR(256) NOT NULL,
     FOREIGN KEY (startup_username) REFERENCES users(username) ON DELETE CASCADE,
-    FOREIGN KEY (vc_username) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (vc_username) REFERENCES users(username) ON DELETE CASCADE
 );
 

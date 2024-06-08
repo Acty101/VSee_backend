@@ -8,13 +8,14 @@ CREATE TABLE users(
   is_vc BIT NOT NULL, 
   points INTEGER NOT NULL, 
   industry VARCHAR(64) NOT NULL,
-  summary VARCHAR(64),
+  summary VARCHAR(64) NOT NULL,
   PRIMARY KEY(username)
 );
 
 CREATE TABLE questions(
   question_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text VARCHAR(256) NOT NULL
+  text VARCHAR(256) NOT NULL,
+  is_vc BIT NOT NULL
 );
 
 CREATE TABLE answers(

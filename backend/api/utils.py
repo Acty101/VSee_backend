@@ -13,3 +13,8 @@ def save_file_to_disk(file: FileStorage) -> str:
     path = backend.app.config["UPLOAD_FOLDER"] / uuid_basename
     file.save(path)
     return uuid_basename
+
+
+def make_err_response(err_code: int, msg: str) -> dict:
+    """Return a structured error response with msg."""
+    return {"status": err_code, "msg": msg}

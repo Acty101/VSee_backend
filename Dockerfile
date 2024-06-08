@@ -15,15 +15,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY sql ./sql
 COPY bin ./bin
 
-# set executable permission and create db
-RUN chmod +x ./bin/backenddb
-RUN ./bin/backenddb create
-
 # copy module 
 COPY backend ./backend
 
 # install module 
 RUN pip install --no-cache-dir -e .
 
+# set executable permission and create db
+RUN chmod +x ./bin/backenddb
+RUN ./bin/backenddb create
 
 ENTRYPOINT [ "flask", "--app", "backend", "run", "--host", "0.0.0.0", "--port", "5000"]

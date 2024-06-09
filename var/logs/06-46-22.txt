@@ -1,0 +1,34 @@
+VC:
+Okay, I'm ready to start the interview.  
+
+Tell me, what is the total investment you're seeking, and what is your current revenue size?  Also, could you briefly describe the industry your company operates in? 
+
+
+Startup:
+We are seeking $5 million in this round of funding. Our current annual recurring revenue (ARR) is $1.2 million.  We operate in the AI-powered [insert industry] space. 
+
+
+VC:
+Okay, $5 million investment for a $1.2 million ARR is interesting.  That suggests you're aiming for significant growth.  Could you elaborate on the specific AI solutions you offer within the [insert industry] space?  What problem are you solving for your customers? 
+
+
+Startup:
+We offer AI-powered solutions that help [insert industry] businesses [describe the specific problem your AI solves].  Our solutions are designed to [describe the benefits of your AI solutions].  We are essentially [describe your company's value proposition in a concise way]. 
+
+
+VC:
+That's a compelling value proposition.  It sounds like you're targeting a specific pain point within the [insert industry] space.  Can you give me a few examples of how your AI solutions have helped existing customers achieve tangible results?  I'm particularly interested in quantifiable improvements they've seen. 
+
+
+Startup:
+We've seen significant results with our customers. For example, [Company A] saw a [percentage] increase in [key metric] after implementing our solution.  [Company B] was able to [describe the specific benefit achieved by Company B].  These are just a few examples of how our AI solutions are helping businesses [restate your value proposition]. 
+
+
+VC:
+Those are impressive results.  It's clear you've developed a strong solution.  Now, let's talk about your vision for the company.  Where do you see your company in the next 5 years?  What are your long-term goals and aspirations? 
+
+
+Startup:
+In the next five years, we envision [describe your company's vision for the future, including market share, product expansion, and impact].  Our long-term goal is to [state your company's long-term ambition, such as becoming a market leader or revolutionizing the industry].  We believe that by [describe how you will achieve your long-term goals], we can [restate your company's impact on the industry]. 
+
+

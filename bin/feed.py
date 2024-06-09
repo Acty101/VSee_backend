@@ -37,7 +37,7 @@ def main():
         is_vc = False
         points = 0
         industry = "Technology"
-        summary = "YanC is a company aimed to democratize access to advanced AI technologies and drive innovation across industries."
+        summary = "yanC is a company aimed to democratize access to advanced AI technologies and drive innovation across industries."
 
         # insert into db
         cur = connection.execute(
@@ -65,12 +65,12 @@ def main():
                     question = row[0]
                     ans = row[1]
                     cur = connection.execute(
-                        "INSERT INTO questions (text, is_vc) VALUES (?, ?)",
+                        "INSERT INTO questions (question, is_vc) VALUES (?, ?)",
                         (question, is_vc),
                     )
                     id = cur.lastrowid
                     connection.execute(
-                        "INSERT INTO answers (question_id, text, username) VALUES (?, ?, ?)",
+                        "INSERT INTO answers (question_id, answer, username) VALUES (?, ?, ?)",
                         (id, ans, username),
                     )
                 line_count += 1

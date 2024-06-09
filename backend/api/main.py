@@ -3,7 +3,7 @@ import backend
 from backend.api.utils import *
 import backend.database
 import backend.model
-
+from backend.model.main import run_models
 
 @backend.app.route("/", methods=["GET"])
 def endpoints():
@@ -57,10 +57,6 @@ def create_acc():
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (username, name, password, filename, type, 0, industry, summary),
     )
-
-    # set session object
-    flask.session["username"] = username
-
     # return an empty string and 201 - created
     return "", 201
 
@@ -79,6 +75,19 @@ def create_acc():
 
 
 # ######
+@backend.app.route("/api/v1/user_info/<username>")
+def get_user_info(username: str):
+    """Return info of username."""
+    connection = backend.database.get_db()
+    if username is None:
+        return (
+            flask.jsonify(make_err_response(404, "username not found.")),
+            404,
+        )
+    cur = connection.execute("SELECT users.name, users.filename, users.is_vc, users.points, users.industry, users.summary"
+                             "FROM users WHERE username = ?", (username,))
+    user_info = cur.fetchall()
+    flask.jsonify({"user": user_info}), 200
 
 
 @backend.app.route("/api/v1/questions/", methods=["GET"])
@@ -95,20 +104,19 @@ def get_question():
             404,
         )
     connection = backend.database.get_db()
-    username = flask.session.get("username")
     size = flask.request.args.get("size", type=int, default=5)
     cur = connection.execute(
-        "SELECT * FROM users WHERE username = ?", (username,)
+        "SELECT points, is_vc FROM users WHERE username = ?", (username,)
     )
     user = cur.fetchone()
     next = user["points"]
     is_vc = user["is_vc"]
     cur = connection.execute(
-        "SELECT question_id, text FROM questions LIMIT ? OFFSET ? WHERE is_vc = ?",
-        (size, next, is_vc),
+        "SELECT question_id, question FROM questions WHERE is_vc = ? LIMIT ? OFFSET ?",
+        (is_vc, size, next),
     )
     questions = cur.fetchall()
-    return questions, 200
+    return flask.jsonify({"questions": questions}), 200
 
 
 @backend.app.route("/api/v1/answers/", methods=["POST"])
@@ -132,7 +140,6 @@ def ans_question():
         )
 
     connection = backend.database.get_db()
-    username = flask.session["username"]
     for entry in data:
         id = entry.get("question_id")
         ans = entry.get("answer")
@@ -142,38 +149,42 @@ def ans_question():
                 404,
             )
         connection.execute(
-            "INSERT INTO answers (question_id, text, username)"
+            "INSERT INTO answers (question_id, answer, username)"
             "VALUES (?, ?, ?)",
             (id, ans, username),
         )
+    # update points
     cur = connection.execute(
-        "SELECT * FROM users WHERE username = ?", (username,)
+        "SELECT points FROM users WHERE username = ?", (username,)
     )
-    username = cur.fetchall()
+    cur = cur.fetchone()
     points = cur["points"]
     new_points = points + len(data)
     connection.execute(
         "UPDATE users SET points = ? WHERE username = ?",
         (new_points, username),
     )
-    return f"Created {len(data)} answers for {username}", 201
+    feedback = f"Created {len(data)} answers for {username}"
+    return flask.jsonify({"feedback": feedback,}), 201
 
-@backend.app.route("/uploads/<filename>/", methods=['GET'])
-def uploads_get(filename):
-    """Upload."""
-    connection = backend.database.get_db()
-    cur = connection.execute(
-        "SELECT * "
-        "FROM users "
-        "WHERE filename = ?",
-        (filename,)
-    )
-    userfile = cur.fetchall()
-    if not userfile:
+@backend.app.route("/api/v1/uploads/<filename>/", methods=['GET'])
+def uploads_get(filename: str):
+    """Serve image files."""
+    path = backend.app.config['UPLOAD_FOLDER'] / Path(filename)
+    if not path.is_file():
         flask.abort(404)
     return flask.send_from_directory(backend.app.config['UPLOAD_FOLDER'],
                                      filename)
-    
+
+@backend.app.route("/api/v1/logs/<filename>/", methods=['GET'])
+def logs_get(filename: str):
+    """Serve log (text) files."""
+    path = backend.app.config['LOG_FOLDER'] / Path(filename)
+    if not path.is_file():
+        flask.abort(404)
+    return flask.send_from_directory(backend.app.config['LOG_FOLDER'],
+                                     filename)
+
 @backend.app.route("/api/v1/startups/", methods=["GET"])
 def get_startups():
     """Returns information about <size> startups in the <page>th page, and their username, and next url.
@@ -193,7 +204,8 @@ def get_startups():
     page = flask.request.args.get("page", type=int, default=0)
     size = flask.request.args.get("size", type=int, default=5)
     offset = page * size
-    startups_count = connection.execute("SELECT COUNT (*) FROM users WHERE is_vc = 0")
+    cur = connection.execute("SELECT COUNT (*) FROM users WHERE is_vc = 0")
+    startups_count = cur.fetchone()["COUNT (*)"]
 
     cur = connection.execute(
         "SELECT username, name, filename, is_vc, points, industry, summary FROM users WHERE is_vc = 0 ORDER BY points DESC LIMIT ? OFFSET ?",
@@ -225,7 +237,7 @@ def get_startups():
 def request_startup_info():
     """Updates the bot_summary table with information obtained from AI models.
 
-    <company> is a required form data field corresponding to company username
+    <company> corresponds to company username
     Returns company name and bot_summary id
     """
     vc = flask.request.args.get("username")
@@ -234,33 +246,59 @@ def request_startup_info():
             flask.jsonify(make_err_response(404, "username not found.")),
             404,
         )
-    startup = flask.request.form.get("company", type=str)
-    cur = connection.cursor()
-    text = "summarize()"
+    startup = flask.request.args.get("company", type=str)
     connection = backend.database.get_db()
+
+    # get VC qa
+    cur = connection.execute(
+        "SELECT question, answer FROM answers "
+        "INNER JOIN questions ON answers.question_id = questions.question_id "
+        "WHERE username = ?",(vc,)
+    )
+    vc_qa = cur.fetchall()
+    vc_list = []
+    for qa in vc_qa:
+        vc_list.append(qa["question"])
+        vc_list.append(qa["answer"])
+
+    # get startup qa
+    cur = connection.execute(
+        "SELECT question, answer FROM answers "
+        "INNER JOIN questions ON answers.question_id = questions.question_id "
+        "WHERE username = ?",(startup,)
+    )
+    startup_qa = cur.fetchall()
+    startup_str = ""
+    for qa in startup_qa:
+        startup_str += f"{qa["question"]};{qa["answer"]};"
+    
+
+    text, filename = run_models(vc_name=vc, startup_name=startup, startup_qa=startup_str, vc_qa=vc_list, logfolder=backend.app.config["LOG_FOLDER"])
+    # insert values into bot summary table
     cur.execute(
-        "INSERT INTO bot_summary(startup_username, vc_username, text)"
-        "VALUES (?,?,?)",
-        (startup, vc, text),
+        "INSERT INTO bot_summary(startup_username, vc_username, summary, filename)"
+        "VALUES (?,?,?,?)",
+        (startup, vc, text, str(filename)),
     )
     summary_id = cur.lastrowid
-    return flask.jsonify({"username": startup, "summary_id": summary_id}), 200
+
+    return flask.jsonify({"username": startup, "summary_id": summary_id, "url": f":/api/v1/request_summary/{summary_id}"}), 200
 
 
-@backend.app.route("/api/v1/request_summary/", methods=["GET"])
-def request_summary():
-    """Returns the summary of <id>.
-
-    <id> is a required form data field representing bot_summary table's primary key
-    """
+@backend.app.route("/api/v1/request_summary/<int:id>/", methods=["GET"])
+def request_summary(id):
+    """Returns the summary of <id>."""
     username = flask.request.args.get("username")
     if username is None:
         return (
             flask.jsonify(make_err_response(404, "username not found.")),
             404,
         )
-    id = flask.request.form.get("id", type=int)
     connection = backend.database.get_db()
-    cur = connection.execute("SELECT * FROM bot_summary WHERE id = ?", (id,))
+    cur = connection.execute("SELECT * FROM bot_summary WHERE summary_id = ?", (id,))
     cur = cur.fetchone()
-    return flask.jsonify({"summary": cur["text"]}), 200
+    if cur is None:
+        return flask.jsonify(make_err_response(404, "No summary found")), 404
+    with open(cur["filename"], 'r') as file:
+        log = file.read()
+    return flask.jsonify({"summary": cur["summary"], "log": log}), 200

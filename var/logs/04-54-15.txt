@@ -1,0 +1,42 @@
+VC:
+Okay, I'm ready to start the interview.  
+
+Tell me, what is the total investment you're seeking, and what is your current revenue size?  Also, could you briefly describe the industry your company operates in? 
+
+
+Startup:
+We are seeking $5 million in funding.  Currently, we have no revenue as we are still in the pre-revenue stage.  yanC_startup/ operates in the [Industry] industry. 
+
+
+VC:
+Okay, thanks for that information.  [Industry] is an interesting space.  Can you tell me more about your company's vision?  What problem are you solving, and what is your long-term goal for yanC_startup/? 
+
+
+Startup:
+Our vision is to [Vision Statement]. We are solving the problem of [Problem Statement]. Our long-term goal is to [Long-Term Goal]. 
+
+
+VC:
+That's a compelling vision.  It sounds like you're tackling a significant problem in the [Industry] industry.  Can you elaborate on your company's competitive advantage?  What makes yanC_startup/ unique compared to other solutions in the market? 
+
+
+Startup:
+Our competitive advantage lies in [Competitive Advantage].  We are unique because [Unique Selling Proposition]. 
+
+
+VC:
+That's a strong competitive advantage.  It sounds like you've identified a key differentiator in the market.  Now, let's talk about your plans for the next 12 months.  What are your key milestones and how do you plan to achieve them?  What are your revenue projections for the next year? 
+
+
+Startup:
+Our key milestones for the next 12 months are:
+
+1. [Milestone 1]
+2. [Milestone 2]
+3. [Milestone 3]
+
+We plan to achieve these milestones by [Plan to Achieve Milestones].
+
+We project our revenue for the next year to be [Revenue Projection]. 
+
+

@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # configurations
 app.config["UPLOAD_FOLDER"] = ROOT / Path("var/uploads")
+app.config["LOG_FOLDER"] = ROOT / Path("var/logs")
 
 # temp secret key to set session object
 app.config["SECRET_KEY"] = (
